@@ -39,10 +39,9 @@
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
-
+#include "./inc/bsp.h"
 #include "chip.h"
 #include <stdbool.h>
-#include <bsp.h>
 
 /* === Macros definitions ====================================================================== */
 
