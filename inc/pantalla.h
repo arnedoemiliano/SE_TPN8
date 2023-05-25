@@ -37,14 +37,14 @@ extern "C" {
 /* === Public macros definitions =============================================================== */
 
 // Def de bits asociados a cada segmento
-#define SEGMENT_A (1 << 0);
-#define SEGMENT_B (1 << 1);
-#define SEGMENT_C (1 << 2);
-#define SEGMENT_D (1 << 3);
-#define SEGMENT_E (1 << 4);
-#define SEGMENT_F (1 << 5);
-#define SEGMENT_G (1 << 6);
-#define SEGMENT_P (1 << 7);
+#define SEGMENT_A (1 << 0)
+#define SEGMENT_B (1 << 1)
+#define SEGMENT_C (1 << 2)
+#define SEGMENT_D (1 << 3)
+#define SEGMENT_E (1 << 4)
+#define SEGMENT_F (1 << 5)
+#define SEGMENT_G (1 << 6)
+#define SEGMENT_P (1 << 7)
 
 /* === Public data type declarations =========================================================== */
 
@@ -60,11 +60,13 @@ typedef void (*display_segments_on_t)(uint8_t segments);
 //! Funcion de callback para prender un digito
 typedef void (*display_digit_on_t)(uint8_t digits);
 
-//! "Interfaz. Coleccion de metodos que deben estar presentes si o si en la "clase"
+//! "Interfaz. Coleccion de metodos que deben estar presentes si o si en la "clase" display.
 typedef struct display_driver_s {
+
     display_screen_off_t ScreenTurnOff;
     display_segments_on_t SegmentsTurnOn;
     display_digit_on_t DigitTurnOn;
+
 } const * const display_driver_t; // puntero constante a la estructura: no puedo modificar ninguno
                                   // de los miembros de la estructura con ese puntero ni puedo
                                   // apuntar a otra direccion de memoria.
@@ -75,9 +77,9 @@ typedef struct display_driver_s {
 
 display_t DisplayCreate(uint8_t digits, display_driver_t driver);
 
-display_t DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size);
+void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size);
 
-display_t DisplayRefresh(display_t display);
+void DisplayRefresh(display_t display);
 
 /* === End of documentation ==================================================================== */
 

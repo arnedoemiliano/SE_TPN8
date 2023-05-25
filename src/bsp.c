@@ -25,9 +25,9 @@ SPDX-License-Identifier: MIT
 
 /* === Headers files inclusions =============================================================== */
 
-#include "./inc/bsp.h"
 #include "chip.h"
 #include "ciaa.h"
+#include "./inc/bsp.h"
 
 /* === Macros definitions ====================================================================== */
 
