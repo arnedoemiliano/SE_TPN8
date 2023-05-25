@@ -29,6 +29,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ================================================================ */
 
 #include <digital.h>
+#include <pantalla.h>
 
 /* === Cabecera C++ ============================================================================ */
 
@@ -43,14 +44,15 @@ extern "C" {
 // Se define la estructura board como publica, pero se define un puntero a una estructura constante
 // con lo cual board_s no puede ser modificada.
 typedef struct board_s {
-    digital_output_t led_verde;
-    digital_output_t led_amarillo;
-    digital_output_t led_azul;
-    digital_output_t led_rojo;
-    digital_input_t tecla_1;
-    digital_input_t tecla_2;
-    digital_input_t tecla_3;
-    digital_input_t tecla_4;
+    digital_output_t buzzer;
+    digital_input_t accept;
+    digital_input_t cancel;
+    digital_input_t set_time;
+    digital_input_t set_alarm;
+    digital_input_t decrement;
+    digital_input_t increment;
+    display_t display;
+
 } const * const board_t;
 
 /* === Public variable declarations ============================================================ */

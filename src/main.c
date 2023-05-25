@@ -39,7 +39,7 @@
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
-#include "./inc/bsp.h"
+#include "bsp.h"
 #include "chip.h"
 #include <stdbool.h>
 
@@ -62,52 +62,6 @@
 int main(void) {
 
     board_t board = BoardCreate();
-
-    int divisor = 0;
-    // bool current_state, last_state = false;
-
-    while (true) {
-        // if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT) == 0) {
-        if (DigitalInputGetState(board->tecla_1)) {
-            // Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, true);
-            DigitalOutputActivate(board->led_azul);
-        } else {
-            // Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, false);
-            DigitalOutputDeactivate(board->led_azul);
-        }
-
-        // current_state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0);
-        // if ((current_state) && (!last_state)) {
-        if (DigitalInputHasActivated(board->tecla_2)) {
-            // Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_1_GPIO, LED_1_BIT);
-            DigitalOutputToggle(board->led_rojo);
-        }
-        // last_state = current_state;
-
-        // if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0) {
-        if (DigitalInputGetState(board->tecla_3)) {
-            // Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
-            DigitalOutputActivate(board->led_amarillo);
-        }
-        // if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0) {
-        if (DigitalInputGetState(board->tecla_4)) {
-            // Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
-            DigitalOutputDeactivate(board->led_amarillo);
-        }
-
-        divisor++;
-        if (divisor == 5) {
-            divisor = 0;
-            // Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_3_GPIO, LED_3_BIT);
-            DigitalOutputToggle(board->led_verde);
-        }
-
-        for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                __asm("NOP");
-            }
-        }
-    }
 
     /*-----------------PRUEBAS-------------------*/
 }

@@ -1,5 +1,5 @@
-/* Copyright 2022, Laboratorio de Microprocesadores 
- * Facultad de Ciencias Exactas y Tecnología 
+/* Copyright 2022, Laboratorio de Microprocesadores
+ * Facultad de Ciencias Exactas y Tecnología
  * Universidad Nacional de Tucuman
  * http://www.microprocesadores.unt.edu.ar/
  * Copyright 2022, Esteban Volentini <evolentini@herrera.unt.edu.ar>
@@ -51,9 +51,9 @@ extern "C" {
 #endif
 
 /* === Public macros definitions =============================================================== */
- 
+
 // Definiciones de los recursos asociados a los DIGITs de la pantalla
-#define DIGITS_GPIO   0
+#define DIGITS_GPIO  0
 
 #define DIGIT_1_PORT 0
 #define DIGIT_1_PIN  0
@@ -82,11 +82,11 @@ extern "C" {
 #define DIGIT_4_GPIO DIGITS_GPIO
 #define DIGIT_4_BIT  3
 #define DIGIT_4_MASK (1 << DIGIT_4_BIT)
-
+// 0b0..001111 (32 bits)
 #define DIGITS_MASK (DIGIT_1_MASK | DIGIT_2_MASK | DIGIT_3_MASK | DIGIT_4_MASK)
 
 // Definiciones de los recursos asociados a los SEGMENTs de la pantalla
-#define SEGMENTS_GPIO 2
+#define SEGMENTS_GPIO  2
 
 #define SEGMENT_A_PORT 4
 #define SEGMENT_A_PIN  0
@@ -137,8 +137,9 @@ extern "C" {
 #define SEGMENT_G_BIT  6
 #define SEGMENT_G_MASK (1 << SEGMENT_G_BIT)
 
-#define SEGMENTS_MASK (SEGMENT_A_MASK | SEGMENT_B_MASK | SEGMENT_C_MASK | \
-        SEGMENT_D_MASK | SEGMENT_E_MASK | SEGMENT_F_MASK | SEGMENT_G_MASK )
+#define SEGMENTS_MASK                                                                              \
+    (SEGMENT_A_MASK | SEGMENT_B_MASK | SEGMENT_C_MASK | SEGMENT_D_MASK | SEGMENT_E_MASK |          \
+     SEGMENT_F_MASK | SEGMENT_G_MASK)
 
 #define SEGMENT_P_PORT 6
 #define SEGMENT_P_PIN  8
@@ -147,29 +148,29 @@ extern "C" {
 #define SEGMENT_P_BIT  16
 
 // Definiciones de los recursos asociados a las teclas del puncho
-#define KEY_F1_PORT 4
-#define KEY_F1_PIN  8
-#define KEY_F1_FUNC SCU_MODE_FUNC4
-#define KEY_F1_GPIO 5
-#define KEY_F1_BIT  12
+#define KEY_F1_PORT     4
+#define KEY_F1_PIN      8
+#define KEY_F1_FUNC     SCU_MODE_FUNC4
+#define KEY_F1_GPIO     5
+#define KEY_F1_BIT      12
 
-#define KEY_F2_PORT 4
-#define KEY_F2_PIN  9
-#define KEY_F2_FUNC SCU_MODE_FUNC4
-#define KEY_F2_GPIO 5
-#define KEY_F2_BIT  13
+#define KEY_F2_PORT     4
+#define KEY_F2_PIN      9
+#define KEY_F2_FUNC     SCU_MODE_FUNC4
+#define KEY_F2_GPIO     5
+#define KEY_F2_BIT      13
 
-#define KEY_F3_PORT 4
-#define KEY_F3_PIN  10
-#define KEY_F3_FUNC SCU_MODE_FUNC4
-#define KEY_F3_GPIO 5
-#define KEY_F3_BIT  14
+#define KEY_F3_PORT     4
+#define KEY_F3_PIN      10
+#define KEY_F3_FUNC     SCU_MODE_FUNC4
+#define KEY_F3_GPIO     5
+#define KEY_F3_BIT      14
 
-#define KEY_F4_PORT 6
-#define KEY_F4_PIN  7
-#define KEY_F4_FUNC SCU_MODE_FUNC4
-#define KEY_F4_GPIO 5
-#define KEY_F4_BIT  15
+#define KEY_F4_PORT     6
+#define KEY_F4_PIN      7
+#define KEY_F4_FUNC     SCU_MODE_FUNC4
+#define KEY_F4_GPIO     5
+#define KEY_F4_BIT      15
 
 #define KEY_ACCEPT_PIN  2
 #define KEY_ACCEPT_PORT 3
@@ -185,13 +186,13 @@ extern "C" {
 
 // Definiciones de los recursos asociados al zumbador
 #define BUZZER_PORT 2
-#define BUZZER_PIN 2
+#define BUZZER_PIN  2
 #define BUZZER_FUNC SCU_MODE_FUNC4
 #define BUZZER_GPIO 5
-#define BUZZER_BIT 2
+#define BUZZER_BIT  2
 
 /* === Public data type declarations =========================================================== */
- 
+
 /* === Public variable declarations ============================================================ */
 
 /* === Public function declarations ============================================================ */
@@ -204,4 +205,4 @@ extern "C" {
 
 /** @} End of module definition for doxygen */
 
-#endif   /* PONCHO_H */
+#endif /* PONCHO_H */

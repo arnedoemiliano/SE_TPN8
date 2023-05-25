@@ -25,7 +25,7 @@ SPDX-License-Identifier: MIT
 
 /* === Headers files inclusions =============================================================== */
 
-#include "./inc/pantalla.h"
+#include "pantalla.h"
 #include "string.h"
 
 /* === Macros definitions ====================================================================== */
