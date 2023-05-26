@@ -1,6 +1,6 @@
 # Laboratorio de Microprocesadores: Trabajo Práctico N°6
 
-Reloj
+Hardware abstraction layer
 
 ## Instalación
 
