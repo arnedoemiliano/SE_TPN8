@@ -55,6 +55,7 @@ typedef struct board_s {
 
 } board_s;
 
+// se cambia el puntero a variable porque no me dejaba modificarlo en el main
 typedef board_s * board_t;
 
 /* === Public variable declarations ============================================================ */
