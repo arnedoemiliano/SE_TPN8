@@ -50,7 +50,7 @@
 /* === Private variable declarations =========================================================== */
 
 /* === Private function declarations =========================================================== */
-
+static board_t board;
 /* === Public variable definitions ============================================================= */
 
 /* === Private variable definitions ============================================================ */
@@ -61,7 +61,45 @@
 
 int main(void) {
 
-    board_t board = BoardCreate();
+    SisTick_Init(1000);
+    board = BoardCreate();
+
+    while (1) {
+
+        if (DigitalInputHasActivated(board->accept)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){1, 1, 1, 1}, 4);
+        }
+
+        if (DigitalInputHasActivated(board->cancel)) {
+            DisplayWriteBCD(board->display, NULL, 0);
+        }
+
+        if (DigitalInputHasActivated(board->set_time)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){2, 2, 2, 2}, 4);
+        }
+
+        if (DigitalInputHasActivated(board->set_alarm)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){3, 3, 3, 3}, 4);
+        }
+
+        if (DigitalInputHasActivated(board->decrement)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){4, 4, 4, 4}, 4);
+        }
+
+        if (DigitalInputHasActivated(board->increment)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){5, 5, 5, 5}, 4);
+        }
+
+        for (int index = 0; index < 100; index++) {
+            for (int delay = 0; delay < 25000; delay++) {
+                __asm("NOP");
+            }
+        }
+    }
+}
+
+void SysTick_Handler(void) {
+    DisplayRefresh(board->display);
 }
 
 /* === End of documentation ==================================================================== */

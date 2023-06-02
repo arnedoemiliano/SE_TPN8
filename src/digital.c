@@ -34,7 +34,7 @@ SPDX-License-Identifier: MIT
     #define OUTPUT_INSTANCES 4
 #endif
 #ifndef INPUT_INSTANCES
-    #define INPUT_INSTANCES 4
+    #define INPUT_INSTANCES 6
 #endif
 
 /* === Private data type declarations ========================================================== */
@@ -79,7 +79,7 @@ digital_output_t DigitalOutputAllocate() {
 digital_input_t DigitalInputAllocate() {
     static struct digital_input_s instances[INPUT_INSTANCES] = {0};
     digital_input_t input = NULL;
-    for (int i = 0; i < OUTPUT_INSTANCES; i++) {
+    for (int i = 0; i < INPUT_INSTANCES; i++) {
         if (instances[i].allocated == false) {
             input = &instances[i];
             instances[i].allocated = true;

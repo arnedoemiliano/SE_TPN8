@@ -53,13 +53,16 @@ typedef struct board_s {
     digital_input_t increment;
     display_t display;
 
-} const * const board_t;
+} board_s;
+
+typedef board_s * board_t;
 
 /* === Public variable declarations ============================================================ */
 
 /* === Public function declarations ============================================================ */
 
 board_t BoardCreate(void);
+void SisTick_Init(uint16_t ticks);
 
 /* === End of documentation ==================================================================== */
 

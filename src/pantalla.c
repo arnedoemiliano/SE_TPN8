@@ -99,7 +99,7 @@ void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size) {
 }
 
 void DisplayRefresh(display_t display) {
-    display->driver->ScreenTurnOff;
+    display->driver->ScreenTurnOff();
     // incrementa active_digit y se reinicia cuando llega al valor maximo
     display->active_digit = (display->active_digit + 1) % display->digits;
     display->driver->SegmentsTurnOn(display->memory[display->active_digit]);

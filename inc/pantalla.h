@@ -27,7 +27,7 @@ SPDX-License-Identifier: MIT
  ** @{ */
 
 /* === Headers files inclusions ================================================================ */
-#include "stdint.h"
+#include <stdint.h>
 /* === Cabecera C++ ============================================================================ */
 
 #ifdef __cplusplus
