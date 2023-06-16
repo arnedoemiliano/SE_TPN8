@@ -163,8 +163,8 @@ void SegmentsTurnOn(uint8_t segments) {
 
 void DigitTurnOn(uint8_t digits) {
 
-    // Se podría haber usado SetPinState porque digits coincide con los bits de los digitos
-    Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1 << digits) & DIGITS_MASK);
+    // En bitValue se utiliza 8 >> digits para invertir el orden en que se prenden los digitos
+    Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (8 >> digits) & DIGITS_MASK);
 }
 /* === Public function implementation ========================================================== */
 

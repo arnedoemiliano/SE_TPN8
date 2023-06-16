@@ -40,54 +40,65 @@
 
 /* === Headers files inclusions =============================================================== */
 #include "bsp.h"
+#include "reloj.h"
 #include "chip.h"
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
-
+#define RES_RELOJ         6 // Cuantos digitos tiene el reloj
+#define RES_DISPLAY_RELOJ 4 // Cuantos digitos del reloj se mostrarán
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
 
-/* === Private function declarations =========================================================== */
 static board_t board;
+static reloj_t reloj;
+
+/* === Private function declarations =========================================================== */
+
+void ActivarAlarma(reloj_t reloj, bool act_desact);
+
 /* === Public variable definitions ============================================================= */
 
 /* === Private variable definitions ============================================================ */
 
+static uint8_t hora_actual[4] = {1, 7, 5, 6};
+
 /* === Private function implementation ========================================================= */
+
+void ActivarAlarma(reloj_t reloj, bool act_desact) {
+}
 
 /* === Public function implementation ========================================================= */
 
 int main(void) {
 
     SisTick_Init(1000);
+    reloj = ClockCreate(50, ActivarAlarma);
     board = BoardCreate();
+
+    // SetClockTime(reloj, hora_actual, RES_RELOJ);
 
     while (1) {
 
         if (DigitalInputHasActivated(board->accept)) {
-            DisplayWriteBCD(board->display, (uint8_t[]){1, 1, 1, 1}, 4);
+            // DisplayWriteBCD(board->display, (uint8_t[]){1, 1, 1, 1}, 4);
+            DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
         }
 
         if (DigitalInputHasActivated(board->cancel)) {
-            DisplayWriteBCD(board->display, NULL, 0);
         }
 
         if (DigitalInputHasActivated(board->set_time)) {
-            DisplayWriteBCD(board->display, (uint8_t[]){2, 2, 2, 2}, 4);
         }
 
         if (DigitalInputHasActivated(board->set_alarm)) {
-            DisplayWriteBCD(board->display, (uint8_t[]){3, 3, 3, 3}, 4);
         }
 
         if (DigitalInputHasActivated(board->decrement)) {
-            DisplayWriteBCD(board->display, (uint8_t[]){4, 4, 4, 4}, 4);
         }
 
         if (DigitalInputHasActivated(board->increment)) {
-            DisplayWriteBCD(board->display, (uint8_t[]){5, 5, 5, 5}, 4);
         }
 
         for (int index = 0; index < 100; index++) {
@@ -99,6 +110,8 @@ int main(void) {
 }
 
 void SysTick_Handler(void) {
+
+    RelojNuevoTick(reloj);
     DisplayRefresh(board->display);
 }
 
