@@ -47,7 +47,7 @@ extern "C" {
 #define SEGMENT_P (1 << 7)
 
 /* === Public data type declarations =========================================================== */
-
+#define TICKS_PER_SECOND 1000
 //! puntero a la estructura display_s
 typedef struct display_s * display_t;
 
@@ -80,6 +80,8 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver);
 void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size);
 
 void DisplayRefresh(display_t display);
+
+void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t factor);
 
 /* === End of documentation ==================================================================== */
 

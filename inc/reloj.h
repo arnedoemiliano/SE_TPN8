@@ -19,7 +19,8 @@ SPDX-License-Identifier: MIT
 #define RELOJ_H
 
 /* === Headers files inclusions ================================================================ */
-
+#include <stdbool.h>
+#include "stdint.h"
 /* === Cabecera C++ ============================================================================ */
 
 #ifdef __cplusplus
@@ -28,8 +29,7 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-#include <stdbool.h>
-#include "stdint.h"
+#define TICKS_PER_SECOND 1000
 
 /* === Public data type declarations =========================================================== */
 

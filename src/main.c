@@ -73,9 +73,11 @@ void ActivarAlarma(reloj_t reloj, bool act_desact) {
 
 int main(void) {
 
-    SisTick_Init(1000);
+    SisTick_Init(TICKS_PER_SECOND);
     reloj = ClockCreate(50, ActivarAlarma);
     board = BoardCreate();
+    DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
+    DisplayFlashDigits(board->display, 0, 3, 50);
 
     // SetClockTime(reloj, hora_actual, RES_RELOJ);
 
@@ -83,7 +85,6 @@ int main(void) {
 
         if (DigitalInputHasActivated(board->accept)) {
             // DisplayWriteBCD(board->display, (uint8_t[]){1, 1, 1, 1}, 4);
-            DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
         }
 
         if (DigitalInputHasActivated(board->cancel)) {
