@@ -76,8 +76,10 @@ int main(void) {
     SisTick_Init(TICKS_PER_SECOND);
     reloj = ClockCreate(50, ActivarAlarma);
     board = BoardCreate();
+
     DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
-    DisplayFlashDigits(board->display, 0, 3, 50);
+    // DisplayFlashDigits(board->display, 0, 3, 0);
+    DisplayToggleDot(board->display, 0);
 
     // SetClockTime(reloj, hora_actual, RES_RELOJ);
 

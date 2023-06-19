@@ -49,7 +49,7 @@ struct display_s {
     uint8_t flashing_from;
     uint8_t flashing_to;
     uint16_t flashing_count;
-    uint16_t flashing_factor;
+    uint8_t flashing_factor;
 };
 
 /* === Private variable declarations =========================================================== */
@@ -138,16 +138,21 @@ void DisplayRefresh(display_t display) {
     display->driver->DigitTurnOn(display->active_digit);
 }
 
-void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t factor) {
+void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t factor) {
 
     // Se usan los mod por si reciben valores fuera del rango permitido
-    display->flashing_from = from % DISPLAY_MAX_DIGITS;
-    display->flashing_to = to % DISPLAY_MAX_DIGITS;
+    display->flashing_from = from % (DISPLAY_MAX_DIGITS + 1);
+    display->flashing_to = to % (DISPLAY_MAX_DIGITS + 1);
     display->flashing_count = 0;
-    display->flashing_factor = factor % 100;
+    display->flashing_factor = factor % 101;
 }
 
-/* === End of documentation ==================================================================== */
+void DisplayToggleDot(display_t display, uint8_t position) {
+    display->memory[position] ^= 1 << 7;
+}
+
+/* === End of documentation ====================================================================
+ */
 
 /*
     display->driver->ScreenTurnOff();

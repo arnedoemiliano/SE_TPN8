@@ -81,7 +81,17 @@ void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size);
 
 void DisplayRefresh(display_t display);
 
-void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t factor);
+void DisplayToggleDot(display_t display, uint8_t position);
+
+/**
+ * @brief Funcion para parpadear digitos.
+ *
+ * @param display puntero a la estructura display_s
+ * @param from desde que digito se hará parpadear
+ * @param to hasta que digito se hará parpadear
+ * @param factor ciclo util de encedido del digito en porcentaje
+ */
+void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t factor);
 
 /* === End of documentation ==================================================================== */
 
