@@ -29,7 +29,7 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-#define TICKS_PER_SECOND 1000
+#define TICKS_PER_SECOND 1000 // Cuantos ticks debe contar el reloj para sumar un segundo
 
 /* === Public data type declarations =========================================================== */
 
@@ -47,7 +47,7 @@ bool GetClockTime(reloj_t reloj, uint8_t * hora, int size);
 
 bool SetClockTime(reloj_t reloj, const uint8_t * hora, int size);
 
-void RelojNuevoTick(reloj_t reloj);
+int RelojNuevoTick(reloj_t reloj);
 
 bool SetAlarmTime(reloj_t reloj, const uint8_t * alarma);
 

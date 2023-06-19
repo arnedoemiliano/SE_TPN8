@@ -47,7 +47,7 @@ extern "C" {
 #define SEGMENT_P (1 << 7)
 
 /* === Public data type declarations =========================================================== */
-#define TICKS_PER_SECOND 1000
+
 //! puntero a la estructura display_s
 typedef struct display_s * display_t;
 

@@ -45,8 +45,9 @@
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
-#define RES_RELOJ         6 // Cuantos digitos tiene el reloj
-#define RES_DISPLAY_RELOJ 4 // Cuantos digitos del reloj se mostrarán
+#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
+#define RES_DISPLAY_RELOJ 4    // Cuantos digitos del reloj se mostrarán
+#define INT_PER_SECOND    1000 // interrupciones por segundo del systick
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
@@ -73,13 +74,12 @@ void ActivarAlarma(reloj_t reloj, bool act_desact) {
 
 int main(void) {
 
-    SisTick_Init(TICKS_PER_SECOND);
-    reloj = ClockCreate(50, ActivarAlarma);
+    SisTick_Init(INT_PER_SECOND);
+    reloj = ClockCreate(TICKS_PER_SECOND, ActivarAlarma);
     board = BoardCreate();
 
     DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
     // DisplayFlashDigits(board->display, 0, 3, 0);
-    DisplayToggleDot(board->display, 0);
 
     // SetClockTime(reloj, hora_actual, RES_RELOJ);
 
@@ -114,7 +114,10 @@ int main(void) {
 
 void SysTick_Handler(void) {
 
-    RelojNuevoTick(reloj);
+    int tick = RelojNuevoTick(reloj);
+    if (tick == TICKS_PER_SECOND - 1 || tick == (TICKS_PER_SECOND) / 2) {
+        DisplayToggleDot(board->display, 1);
+    }
     DisplayRefresh(board->display);
 }
 
