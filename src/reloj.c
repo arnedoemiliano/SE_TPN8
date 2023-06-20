@@ -118,9 +118,11 @@ bool SetClockTime(reloj_t reloj, const uint8_t * hora_nueva, int size) {
 // En principio esta funcion es la que llama el systick en cada interrupcion
 int RelojNuevoTick(reloj_t reloj) {
 
-    if (reloj->tick_actual >= reloj->ticks) {
-        NuevoSegundo(reloj);
-        VerificarAlarma(reloj);
+    if ((reloj->tick_actual >= reloj->ticks)) {
+        if (reloj->hora_valida == true) {
+            NuevoSegundo(reloj);
+            VerificarAlarma(reloj);
+        }
         reloj->tick_actual = 0;
     } else {
         reloj->tick_actual++;

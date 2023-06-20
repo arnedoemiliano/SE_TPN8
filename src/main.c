@@ -50,6 +50,15 @@
 #define INT_PER_SECOND    1000 // interrupciones por segundo del systick
 /* === Private data type declarations ========================================================== */
 
+typedef enum {
+    SIN_CONFIGURAR,
+    MOSTRANDO_HORA,
+    AJUSTANDO_MINUTOS_ACTUAL,
+    AJUSTANDO_HORAS_ACTUAL,
+    AJUSTANDO_MINUTOS_ALARMA,
+    AJUSTANDO_HORAS_ALARMA,
+} modo_t;
+
 /* === Private variable declarations =========================================================== */
 
 static board_t board;
@@ -60,10 +69,10 @@ static reloj_t reloj;
 void ActivarAlarma(reloj_t reloj, bool act_desact);
 
 /* === Public variable definitions ============================================================= */
-
+modo_t modo;
 /* === Private variable definitions ============================================================ */
 
-static uint8_t hora_actual[4] = {1, 7, 5, 6};
+// static uint8_t hora_actual[4] = {1, 7, 5, 6};
 
 /* === Private function implementation ========================================================= */
 
@@ -74,14 +83,11 @@ void ActivarAlarma(reloj_t reloj, bool act_desact) {
 
 int main(void) {
 
-    SisTick_Init(INT_PER_SECOND);
     reloj = ClockCreate(TICKS_PER_SECOND, ActivarAlarma);
     board = BoardCreate();
-
-    DisplayWriteBCD(board->display, hora_actual, RES_DISPLAY_RELOJ);
-    // DisplayFlashDigits(board->display, 0, 3, 0);
-
-    // SetClockTime(reloj, hora_actual, RES_RELOJ);
+    modo = SIN_CONFIGURAR;
+    SisTick_Init(INT_PER_SECOND);
+    DisplayFlashDigits(board->display, 0, 3, 50); // cuando inicia el reloj los digitos parpadean
 
     while (1) {
 
@@ -114,9 +120,16 @@ int main(void) {
 
 void SysTick_Handler(void) {
 
+    uint8_t hora[4];
+
     int tick = RelojNuevoTick(reloj);
     if (tick == TICKS_PER_SECOND - 1 || tick == (TICKS_PER_SECOND) / 2) {
-        DisplayToggleDot(board->display, 1);
+
+        if (modo <= MOSTRANDO_HORA) {
+            (void)GetClockTime(reloj, hora, 4);
+            DisplayWriteBCD(board->display, hora, 4);
+            DisplayToggleDot(board->display, 1);
+        }
     }
     DisplayRefresh(board->display);
 }
