@@ -101,13 +101,19 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver) {
 
 void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size) {
 
-    memset(display->memory, 0, sizeof(display->memory));
+    // memset(display->memory, 0, sizeof(display->memory));
+    for (size_t i = 0; i <= sizeof(display->memory) - 1; i++) {
+
+        display->memory[i] &= 0b10000000;
+    }
+
+    // display->memory[] &= 129;
 
     for (int i = 0; i < size; i++) {
-
         if (i >= display->digits)
             break;
-        display->memory[i] = IMAGES[numbers[i]];
+        // Me estaba cleareando el msb de memory (punto)
+        (display->memory[i]) |= (IMAGES[numbers[i]]);
     }
 }
 
@@ -115,7 +121,7 @@ void DisplayRefresh(display_t display) {
     // Suponiendo un duty factor de 50%: la primera mitad del segundo apago algunos digitos y la
     // segunda mitad prendo todos
 
-    uint8_t segments;
+    uint8_t segments = 0;
 
     display->driver->ScreenTurnOff();
     display->active_digit = (display->active_digit + 1) % display->digits;
@@ -130,10 +136,13 @@ void DisplayRefresh(display_t display) {
         if (display->flashing_count < off_time) {
             if (display->active_digit >= display->flashing_from &&
                 display->active_digit <= display->flashing_to) {
+                // Aqui en principio no debería corregir el no parpadeo del punto porque parpadean
+                // al mismo tiempo
                 segments = 0;
             }
         }
     }
+
     display->driver->SegmentsTurnOn(segments);
     display->driver->DigitTurnOn(display->active_digit);
 }
@@ -148,6 +157,7 @@ void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t fac
 }
 
 void DisplayToggleDot(display_t display, uint8_t position) {
+
     display->memory[position] ^= 1 << 7;
 }
 

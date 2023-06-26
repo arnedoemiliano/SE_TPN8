@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
-#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
+//#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
 #define RES_DISPLAY_RELOJ 4    // Cuantos digitos del reloj se mostrarán
 #define INT_PER_SECOND    1000 // interrupciones por segundo del systick
 /* === Private data type declarations ========================================================== */
@@ -67,6 +67,7 @@ static reloj_t reloj;
 /* === Private function declarations =========================================================== */
 
 void ActivarAlarma(reloj_t reloj, bool act_desact);
+void CambiarModo(modo_t modo);
 
 /* === Public variable definitions ============================================================= */
 modo_t modo;
@@ -77,6 +78,34 @@ modo_t modo;
 /* === Private function implementation ========================================================= */
 
 void ActivarAlarma(reloj_t reloj, bool act_desact) {
+}
+
+void CambiarModo(modo_t valor) {
+    modo = valor;
+
+    switch (modo) {
+    case SIN_CONFIGURAR:
+        // parpadeo de digitos, creo que en setup(se llama a CambiarModo(SIN_CONFIGURAR))
+        break;
+    case MOSTRANDO_HORA:
+        DisplayFlashDigits(board->display, 0, 3, 0); // digitos sin parpadear
+        SetClockTime(reloj, (uint8_t[]){1, 2, 3, 4}, RES_DISPLAY_RELOJ);
+        break;
+    case AJUSTANDO_MINUTOS_ACTUAL:
+        /* code */
+        break;
+    case AJUSTANDO_HORAS_ACTUAL:
+        /* code */
+        break;
+    case AJUSTANDO_MINUTOS_ALARMA:
+        /* code */
+        break;
+    case AJUSTANDO_HORAS_ALARMA:
+        /* code */
+        break;
+    default:
+        break;
+    }
 }
 
 /* === Public function implementation ========================================================= */
@@ -90,9 +119,20 @@ int main(void) {
     DisplayFlashDigits(board->display, 0, 3, 50); // cuando inicia el reloj los digitos parpadean
 
     while (1) {
+        /*
+
+        Problemas: las funciones memset y todas las que modifican reloj->memory, ponen en 0 el bit
+        del punto. La que mas lo hace es DisplayWriteBCD que se la llama cada segundo. Tampoco puedo
+        llamarla cada minuto porque sino nunca podría mostrar los segundos. La solucion mas viable,
+        es cambiar el memset y resetear los 7 LSB de cada elemento de memory manualmente.
+
+
+        */
 
         if (DigitalInputHasActivated(board->accept)) {
-            // DisplayWriteBCD(board->display, (uint8_t[]){1, 1, 1, 1}, 4);
+            if (modo == SIN_CONFIGURAR) { // despues de 3 segundos
+                CambiarModo(MOSTRANDO_HORA);
+            }
         }
 
         if (DigitalInputHasActivated(board->cancel)) {
@@ -120,14 +160,14 @@ int main(void) {
 
 void SysTick_Handler(void) {
 
-    uint8_t hora[4];
+    uint8_t hora[RES_DISPLAY_RELOJ];
 
     int tick = RelojNuevoTick(reloj);
     if (tick == TICKS_PER_SECOND - 1 || tick == (TICKS_PER_SECOND) / 2) {
 
         if (modo <= MOSTRANDO_HORA) {
-            (void)GetClockTime(reloj, hora, 4);
-            DisplayWriteBCD(board->display, hora, 4);
+            (void)GetClockTime(reloj, hora, RES_DISPLAY_RELOJ);
+            DisplayWriteBCD(board->display, hora, RES_DISPLAY_RELOJ);
             DisplayToggleDot(board->display, 1);
         }
     }
