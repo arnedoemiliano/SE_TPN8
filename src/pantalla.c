@@ -102,6 +102,7 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver) {
 void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size) {
 
     // memset(display->memory, 0, sizeof(display->memory));
+
     for (size_t i = 0; i <= sizeof(display->memory) - 1; i++) {
 
         display->memory[i] &= 0b10000000;
@@ -132,12 +133,13 @@ void DisplayRefresh(display_t display) {
 
         uint16_t off_time = TICKS_PER_SECOND * display->flashing_factor / 100;
 
-        display->flashing_count = (display->flashing_count + 1) % TICKS_PER_SECOND;
+        display->flashing_count = (display->flashing_count + 1) % (TICKS_PER_SECOND + 1);
         if (display->flashing_count < off_time) {
             if (display->active_digit >= display->flashing_from &&
                 display->active_digit <= display->flashing_to) {
                 // Aqui en principio no debería corregir el no parpadeo del punto porque parpadean
                 // al mismo tiempo
+                // segments = display->memory[display->active_digit] & 0b10000000;
                 segments = 0;
             }
         }
@@ -159,6 +161,11 @@ void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t fac
 void DisplayToggleDot(display_t display, uint8_t position) {
 
     display->memory[position] ^= 1 << 7;
+}
+
+void DisplaySetDot(display_t display, uint8_t position) {
+
+    display->memory[position] |= 1 << 7;
 }
 
 /* === End of documentation ====================================================================

@@ -83,6 +83,8 @@ void DisplayRefresh(display_t display);
 
 void DisplayToggleDot(display_t display, uint8_t position);
 
+void DisplaySetDot(display_t display, uint8_t position);
+
 /**
  * @brief Funcion para parpadear digitos.
  *
