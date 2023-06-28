@@ -63,17 +63,22 @@ typedef enum {
 
 static board_t board;
 static reloj_t reloj;
+uint8_t input_time[4]; // 4 porque nunca se configura la hora por segundos
+static const uint8_t limite_min[] = {5, 9};
+static const uint8_t limite_hs[] = {2, 3};
 
-/* === Private function declarations =========================================================== */
+/* === Private function declarations ===========================================================
+ */
 
 void ActivarAlarma(reloj_t reloj, bool act_desact);
 void CambiarModo(modo_t modo);
+void IncrementarBCD(uint8_t numero[2], const uint8_t limite[2]);
+// limite indica donde se pasa despues de restar 1 a 00
+void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]);
 
 /* === Public variable definitions ============================================================= */
 modo_t modo;
 /* === Private variable definitions ============================================================ */
-
-// static uint8_t hora_actual[4] = {1, 7, 5, 6};
 
 /* === Private function implementation ========================================================= */
 
@@ -89,22 +94,56 @@ void CambiarModo(modo_t valor) {
         break;
     case MOSTRANDO_HORA:
         DisplayFlashDigits(board->display, 0, 3, 0); // digitos sin parpadear
-        SetClockTime(reloj, (uint8_t[]){1, 2, 3, 4}, RES_DISPLAY_RELOJ);
+        // SetClockTime(reloj, (uint8_t[]){1, 2, 3, 4}, RES_DISPLAY_RELOJ);
         break;
     case AJUSTANDO_MINUTOS_ACTUAL:
-        /* code */
+        DisplayFlashDigits(board->display, 2, 3, 50);
         break;
     case AJUSTANDO_HORAS_ACTUAL:
-        /* code */
+        DisplayFlashDigits(board->display, 0, 1, 50);
         break;
     case AJUSTANDO_MINUTOS_ALARMA:
-        /* code */
+
         break;
     case AJUSTANDO_HORAS_ALARMA:
         /* code */
         break;
     default:
         break;
+    }
+}
+
+void IncrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
+
+    // uint8_t temp_limite_1 = limite[1];
+
+    numero[1]++;
+
+    // Corroboro antes si se llego al limite para que el ahora segundo if no me rompa la condicion
+    // de limite
+    if ((numero[0] == limite[0]) && (numero[1] > limite[1])) {
+        numero[0] = 0;
+        numero[1] = 0;
+    }
+
+    if (numero[1] > 9) {
+
+        numero[1] = 0;
+        numero[0]++;
+    }
+}
+
+void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
+    numero[1]--;
+
+    if ((numero[0] == 0) && ((int8_t)numero[1] < 0)) {
+        numero[0] = limite[0];
+        numero[1] = limite[1];
+    }
+    if ((int8_t)numero[1] < 0) {
+
+        numero[1] = 9;
+        numero[0]--;
     }
 }
 
@@ -132,22 +171,45 @@ int main(void) {
         if (DigitalInputHasActivated(board->accept)) {
             if (modo == SIN_CONFIGURAR) { // despues de 3 segundos
                 CambiarModo(MOSTRANDO_HORA);
+            } else if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
+                CambiarModo(AJUSTANDO_HORAS_ACTUAL);
+            } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
+                CambiarModo(MOSTRANDO_HORA);
+                SetClockTime(reloj, input_time, sizeof(input_time));
             }
         }
 
         if (DigitalInputHasActivated(board->cancel)) {
         }
-
+        // F1
         if (DigitalInputHasActivated(board->set_time)) {
+            CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
+            GetClockTime(reloj, input_time, sizeof(input_time));
+            DisplayWriteBCD(board->display, input_time, sizeof(input_time));
         }
 
         if (DigitalInputHasActivated(board->set_alarm)) {
         }
 
+        // F3
         if (DigitalInputHasActivated(board->decrement)) {
+            if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
+                DecrementarBCD(&input_time[2], limite_min);
+            } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
+                DecrementarBCD(input_time, limite_hs);
+            }
+            DisplayWriteBCD(board->display, input_time, sizeof(input_time));
         }
 
+        // F4
         if (DigitalInputHasActivated(board->increment)) {
+            if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
+                // le paso el puntero a los dos digitos menos significativos
+                IncrementarBCD(&input_time[2], limite_min);
+            } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
+                IncrementarBCD(input_time, limite_hs);
+            }
+            DisplayWriteBCD(board->display, input_time, sizeof(input_time));
         }
 
         for (int index = 0; index < 100; index++) {
@@ -177,3 +239,10 @@ void SysTick_Handler(void) {
 /* === End of documentation ==================================================================== */
 
 /** @} End of module definition for doxygen */
+
+/*
+if (numero[0] < limite[0]) {
+            numero[1] = 0;
+        }
+
+*/
