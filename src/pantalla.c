@@ -49,7 +49,7 @@ struct display_s {
     uint8_t flashing_from;
     uint8_t flashing_to;
     uint16_t flashing_count;
-    uint8_t flashing_factor;
+    uint16_t flashing_factor;
 };
 
 /* === Private variable declarations =========================================================== */
@@ -106,6 +106,7 @@ void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size) {
     for (size_t i = 0; i <= sizeof(display->memory) - 1; i++) {
 
         display->memory[i] &= 0b10000000;
+        // display->memory[i] &= 0;
     }
 
     // display->memory[] &= 129;
@@ -131,9 +132,89 @@ void DisplayRefresh(display_t display) {
 
     if (display->flashing_factor) {
 
+        if (display->active_digit == 0) {
+            display->flashing_count = (display->flashing_count + 1) %
+                                      (display->flashing_factor); // f(display->flashing_factor +1)
+        }
+
+        if (display->active_digit >= display->flashing_from &&
+            display->active_digit <= display->flashing_to) {
+            if (display->flashing_count > (display->flashing_factor / 2)) {
+                segments = 0;
+                // segments = display->memory[display->active_digit] & 0b10000000;
+            }
+        }
+    }
+
+    display->driver->SegmentsTurnOn(segments);
+    display->driver->DigitTurnOn(display->active_digit);
+}
+
+void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t factor) {
+
+    // Se usan los mod por si reciben valores fuera del rango permitido
+    display->flashing_from = from % (DISPLAY_MAX_DIGITS + 1);
+    display->flashing_to = to % (DISPLAY_MAX_DIGITS + 1);
+    display->flashing_count = 0;
+    display->flashing_factor = factor;
+}
+
+void DisplayToggleDot(display_t display, uint8_t digit_dot) {
+
+    display->memory[digit_dot] ^= 1 << 7;
+}
+
+void DisplaySetDot(display_t display, uint8_t digit_dot) {
+
+    uint8_t mask = 0x01;
+    for (int i = 0; i < 8; i++) {
+        if (digit_dot & mask) {
+            display->memory[i] |= 1 << 7;
+        }
+        mask <<= 1;
+    }
+}
+
+void DisplayClearDot(display_t display, uint8_t digit_dot) {
+
+    uint8_t mask = 0x01;
+    for (int i = 0; i < 8; i++) {
+        if (digit_dot & mask) {
+            display->memory[i] &= 0 << 7;
+        }
+        mask <<= 1;
+    }
+}
+
+/* === End of documentation ====================================================================
+ */
+
+/*
+    display->driver->ScreenTurnOff();
+    display->active_digit = (display->active_digit + 1) % display->digits;
+    display->driver->SegmentsTurnOn(display->memory[display->active_digit]);
+    display->driver->DigitTurnOn(display->active_digit);
+
+
+
+
+
+    void DisplayRefresh(display_t display) {
+    // Suponiendo un duty factor de 50%: la primera mitad del segundo apago algunos digitos y la
+    // segunda mitad prendo todos
+
+    uint8_t segments = 0;
+
+    display->driver->ScreenTurnOff();
+    display->active_digit = (display->active_digit + 1) % display->digits;
+
+    segments = display->memory[display->active_digit];
+
+    if (display->flashing_factor) {
+
         uint16_t off_time = TICKS_PER_SECOND * display->flashing_factor / 100;
 
-        display->flashing_count = (display->flashing_count + 1) % (TICKS_PER_SECOND + 1);
+        display->flashing_count = (display->flashing_count + 1) % (TICKS_PER_SECOND - 1);
         if (display->flashing_count < off_time) {
             if (display->active_digit >= display->flashing_from &&
                 display->active_digit <= display->flashing_to) {
@@ -148,33 +229,5 @@ void DisplayRefresh(display_t display) {
     display->driver->SegmentsTurnOn(segments);
     display->driver->DigitTurnOn(display->active_digit);
 }
-
-void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t factor) {
-
-    // Se usan los mod por si reciben valores fuera del rango permitido
-    display->flashing_from = from % (DISPLAY_MAX_DIGITS + 1);
-    display->flashing_to = to % (DISPLAY_MAX_DIGITS + 1);
-    display->flashing_count = 0;
-    display->flashing_factor = factor % 101;
-}
-
-void DisplayToggleDot(display_t display, uint8_t position) {
-
-    display->memory[position] ^= 1 << 7;
-}
-
-void DisplaySetDot(display_t display, uint8_t position) {
-
-    display->memory[position] |= 1 << 7;
-}
-
-/* === End of documentation ====================================================================
- */
-
-/*
-    display->driver->ScreenTurnOff();
-    display->active_digit = (display->active_digit + 1) % display->digits;
-    display->driver->SegmentsTurnOn(display->memory[display->active_digit]);
-    display->driver->DigitTurnOn(display->active_digit);
 */
 /** @} End of module definition for doxygen */

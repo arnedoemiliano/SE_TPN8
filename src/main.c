@@ -63,7 +63,7 @@ typedef enum {
 
 static board_t board;
 static reloj_t reloj;
-static uint8_t temp_input[4]; // 4 porque nunca se configura la hora por minutos
+static uint8_t temp_input[4] = {0, 0, 0, 0}; // 4 porque nunca se configura la hora por minutos
 static const uint8_t limite_min[] = {5, 9};
 static const uint8_t limite_hs[] = {2, 3};
 
@@ -90,23 +90,23 @@ void CambiarModo(modo_t valor) {
 
     switch (modo) {
     case SIN_CONFIGURAR:
-        DisplayFlashDigits(board->display, 0, 3, 50);
+        DisplayFlashDigits(board->display, 0, 3, 250);
         break;
     case MOSTRANDO_HORA:
         DisplayFlashDigits(board->display, 0, 3, 0); // digitos sin parpadear
         // SetClockTime(reloj, (uint8_t[]){1, 2, 3, 4}, RES_DISPLAY_RELOJ);
         break;
     case AJUSTANDO_MINUTOS_ACTUAL:
-        DisplayFlashDigits(board->display, 2, 3, 50);
+        DisplayFlashDigits(board->display, 2, 3, 250);
         break;
     case AJUSTANDO_HORAS_ACTUAL:
-        DisplayFlashDigits(board->display, 0, 1, 50);
+        DisplayFlashDigits(board->display, 0, 1, 250);
         break;
     case AJUSTANDO_MINUTOS_ALARMA:
-        DisplayFlashDigits(board->display, 2, 3, 50);
+        DisplayFlashDigits(board->display, 2, 3, 250);
         break;
     case AJUSTANDO_HORAS_ALARMA:
-        DisplayFlashDigits(board->display, 0, 1, 50);
+        DisplayFlashDigits(board->display, 0, 1, 250);
         break;
     default:
         break;
@@ -155,7 +155,8 @@ int main(void) {
     board = BoardCreate();
     modo = SIN_CONFIGURAR;
     SisTick_Init(INT_PER_SECOND);
-    DisplayFlashDigits(board->display, 0, 3, 50); // cuando inicia el reloj los digitos parpadean
+    DisplayToggleDot(board->display, 1);
+    DisplayFlashDigits(board->display, 0, 3, 250); // cuando inicia el reloj los digitos parpadean
 
     while (1) {
         /*
@@ -169,9 +170,7 @@ int main(void) {
         */
         // ACEPTAR
         if (DigitalInputHasActivated(board->accept)) {
-            if (modo == SIN_CONFIGURAR) { // despues de 3 segundos
-                CambiarModo(MOSTRANDO_HORA);
-            } else if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
+            if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
                 CambiarModo(AJUSTANDO_HORAS_ACTUAL);
             } else if (modo == AJUSTANDO_MINUTOS_ALARMA) {
                 CambiarModo(AJUSTANDO_HORAS_ALARMA);
@@ -179,27 +178,51 @@ int main(void) {
                 CambiarModo(MOSTRANDO_HORA);
                 SetClockTime(reloj, temp_input, sizeof(temp_input));
             } else if (modo == AJUSTANDO_HORAS_ALARMA) {
-                CambiarModo(MOSTRANDO_HORA);
+                DisplayClearDot(board->display, DOT_0 | DOT_1 | DOT_2);
                 SetAlarmTime(reloj, temp_input);
+                CambiarModo(MOSTRANDO_HORA);
+            } else if (modo == MOSTRANDO_HORA) {
+                if (!GetAlarmTime(reloj, temp_input)) {
+                    ToggleHabAlarma(reloj);
+                    DisplaySetDot(board->display, DOT_3);
+                }
             }
         }
         // CANCELAR
         if (DigitalInputHasActivated(board->cancel)) {
-            if (modo == AJUSTANDO_MINUTOS_ACTUAL || modo == AJUSTANDO_HORAS_ACTUAL) {
-                CambiarModo(SIN_CONFIGURAR);
-                // temp_input = {0, 0, 0, 0};
+
+            if (modo == AJUSTANDO_MINUTOS_ACTUAL || modo == AJUSTANDO_MINUTOS_ALARMA) {
+                if (GetClockTime(reloj, temp_input, sizeof(temp_input))) {
+                    CambiarModo(MOSTRANDO_HORA);
+                    DisplayClearDot(board->display, DOT_MASK);
+                } else {
+                    // DisplayClearDot(board->display, 1);
+                    // DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+                    CambiarModo(SIN_CONFIGURAR);
+                }
+            } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
+                CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
+            } else if (modo == AJUSTANDO_HORAS_ALARMA) {
+                CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
+            } else if (modo == MOSTRANDO_HORA) {
+                if (GetAlarmTime(reloj, temp_input)) {
+                    ToggleHabAlarma(reloj);
+                    DisplayClearDot(board->display, DOT_3);
+                }
             }
         }
         // F1
         if (DigitalInputHasActivated(board->set_time)) {
             CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
             GetClockTime(reloj, temp_input, sizeof(temp_input));
+            DisplayClearDot(board->display, DOT_1);
             DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
         }
         // F2
         if (DigitalInputHasActivated(board->set_alarm)) {
             CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
             GetAlarmTime(reloj, temp_input);
+            DisplaySetDot(board->display, DOT_MASK);
             DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
         }
 
@@ -235,20 +258,24 @@ int main(void) {
 void SysTick_Handler(void) {
 
     uint8_t hora[RES_DISPLAY_RELOJ];
+
     int tick = RelojNuevoTick(reloj);
     if (modo <= MOSTRANDO_HORA) {
-
-        if (tick == TICKS_PER_SECOND - 1 || tick == (TICKS_PER_SECOND) / 2) {
+        if (tick == 0) {
             (void)GetClockTime(reloj, hora, RES_DISPLAY_RELOJ);
+            DisplayWriteBCD(board->display, hora, sizeof(hora));
             DisplayToggleDot(board->display, 1);
-            DisplayWriteBCD(board->display, hora, RES_DISPLAY_RELOJ);
+            VerificarAlarma(reloj);
+        }
+        if (tick == TICKS_PER_SECOND / 2) {
+            DisplayToggleDot(board->display, 1);
         }
     }
-
     DisplayRefresh(board->display);
 }
 
-/* === End of documentation ==================================================================== */
+/* === End of documentation ====================================================================
+ */
 
 /** @} End of module definition for doxygen */
 
@@ -256,5 +283,7 @@ void SysTick_Handler(void) {
 if (numero[0] < limite[0]) {
             numero[1] = 0;
         }
+
+
 
 */

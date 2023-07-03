@@ -55,7 +55,7 @@ bool GetAlarmTime(reloj_t reloj, uint8_t * alarma);
 
 void VerificarAlarma(reloj_t reloj);
 
-void DeshabilitarAlarma(reloj_t reloj);
+void ToggleHabAlarma(reloj_t reloj);
 
 void PosponerAlarma(reloj_t reloj, uint8_t tiempo);
 

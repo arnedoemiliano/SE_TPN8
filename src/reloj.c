@@ -118,7 +118,7 @@ bool SetClockTime(reloj_t reloj, const uint8_t * hora_nueva, int size) {
 // En principio esta funcion es la que llama el systick en cada interrupcion
 int RelojNuevoTick(reloj_t reloj) {
 
-    if ((reloj->tick_actual >= reloj->ticks)) {
+    if ((reloj->tick_actual >= (reloj->ticks - 1))) { // if ((reloj->tick_actual >= reloj->ticks)) {
         if (reloj->hora_valida == true) {
             NuevoSegundo(reloj);
             VerificarAlarma(reloj);
@@ -131,6 +131,7 @@ int RelojNuevoTick(reloj_t reloj) {
 }
 
 bool SetAlarmTime(reloj_t reloj, const uint8_t * alarma) {
+    // No me debería dejar setear una alarma si nunca se configuró la hora
 
     memcpy(reloj->alarma, alarma, 4);
     reloj->alarma_habilitada = true;
@@ -164,9 +165,9 @@ void VerificarAlarma(reloj_t reloj) {
     }
 }
 
-void DeshabilitarAlarma(reloj_t reloj) {
+void ToggleHabAlarma(reloj_t reloj) {
 
-    reloj->alarma_habilitada = false;
+    reloj->alarma_habilitada ^= 1;
     reloj->snooze_offset = 0;
 }
 
@@ -180,7 +181,32 @@ void CancelarAlarma(reloj_t reloj) {
     reloj->snooze_offset = 0;
     reloj->disparar_alarma(reloj, false);
 }
+/*
+void DeshabilitarAlarma(reloj_t reloj) {
+
+    reloj->alarma_habilitada = false;
+    reloj->snooze_offset = 0;
+}
+*/
 
 /* === End of documentation ==================================================================== */
 
 /** @} End of module definition for doxygen */
+
+/*
+int RelojNuevoTick(reloj_t reloj) {
+    bool act_tick;
+
+    if ((reloj->tick_actual >= (reloj->ticks - 1))) { // if ((reloj->tick_actual >= reloj->ticks)) {
+        if (reloj->hora_valida == true) {
+            NuevoSegundo(reloj);
+            VerificarAlarma(reloj);
+        }
+        reloj->tick_actual = 0;
+    } else {
+        reloj->tick_actual++;
+    }
+    return reloj->tick_actual;
+}
+
+*/

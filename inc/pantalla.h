@@ -45,6 +45,11 @@ extern "C" {
 #define SEGMENT_F (1 << 5)
 #define SEGMENT_G (1 << 6)
 #define SEGMENT_P (1 << 7)
+#define DOT_0     (1 << 0) // el de mas a la izquierda
+#define DOT_1     (1 << 1)
+#define DOT_2     (1 << 2)
+#define DOT_3     (1 << 3)
+#define DOT_MASK  (DOT_0 | DOT_1 | DOT_2 | DOT_3)
 
 /* === Public data type declarations =========================================================== */
 
@@ -81,9 +86,11 @@ void DisplayWriteBCD(display_t display, uint8_t * numbers, uint8_t size);
 
 void DisplayRefresh(display_t display);
 
-void DisplayToggleDot(display_t display, uint8_t position);
+void DisplayToggleDot(display_t display, uint8_t digit_dot);
 
-void DisplaySetDot(display_t display, uint8_t position);
+void DisplaySetDot(display_t display, uint8_t digit_dot);
+
+void DisplayClearDot(display_t display, uint8_t digit_dot);
 
 /**
  * @brief Funcion para parpadear digitos.
@@ -93,7 +100,7 @@ void DisplaySetDot(display_t display, uint8_t position);
  * @param to hasta que digito se hará parpadear
  * @param factor ciclo util de encedido del digito en porcentaje
  */
-void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint8_t factor);
+void DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t factor);
 
 /* === End of documentation ==================================================================== */
 
