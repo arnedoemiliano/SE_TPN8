@@ -43,6 +43,7 @@
 #include "reloj.h"
 #include "chip.h"
 #include <stdbool.h>
+#include "digital.h"
 
 /* === Macros definitions ====================================================================== */
 //#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
@@ -60,12 +61,12 @@ typedef enum {
 } modo_t;
 
 /* === Private variable declarations =========================================================== */
-
 static board_t board;
 static reloj_t reloj;
 static uint8_t temp_input[4] = {0, 0, 0, 0}; // 4 porque nunca se configura la hora por minutos
 static const uint8_t limite_min[] = {5, 9};
 static const uint8_t limite_hs[] = {2, 3};
+static bool alarma_sonando = false;
 
 /* === Private function declarations ===========================================================
  */
@@ -83,6 +84,13 @@ modo_t modo;
 /* === Private function implementation ========================================================= */
 
 void ActivarAlarma(reloj_t reloj, bool act_desact) {
+    if (act_desact) {
+        DigitalOutputActivate(board->buzzer);
+        alarma_sonando = true;
+    } else {
+        DigitalOutputDeactivate(board->buzzer);
+        alarma_sonando = false;
+    }
 }
 
 void CambiarModo(modo_t valor) {
@@ -185,6 +193,8 @@ int main(void) {
                 if (!GetAlarmTime(reloj, temp_input)) {
                     ToggleHabAlarma(reloj);
                     DisplaySetDot(board->display, DOT_3);
+                } else if (alarma_sonando) {
+                    PosponerAlarma(reloj, 5);
                 }
             }
         }
@@ -205,9 +215,11 @@ int main(void) {
             } else if (modo == AJUSTANDO_HORAS_ALARMA) {
                 CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
             } else if (modo == MOSTRANDO_HORA) {
-                if (GetAlarmTime(reloj, temp_input)) {
+                if (GetAlarmTime(reloj, temp_input) && !alarma_sonando) {
                     ToggleHabAlarma(reloj);
                     DisplayClearDot(board->display, DOT_3);
+                } else if (alarma_sonando) {
+                    CancelarAlarma(reloj);
                 }
             }
         }

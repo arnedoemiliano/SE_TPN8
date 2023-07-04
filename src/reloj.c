@@ -146,8 +146,14 @@ bool GetAlarmTime(reloj_t reloj, uint8_t * alarma) {
 
 // La funcion pasa hora_actual y alarma a segundos, esto se hace para facilitar el offset de tiempo
 // que se agrega cuando se pospone la alarma, y compara cada minuto si hay coincidencia.
+// modificacion: Se hace que la funcion devuelva un booleando para saber si la alarma está sonando o
+// no. en funcion del parametro 'mode' la funcion disparará la alarma o avisará que está sonando al
+// encontrar coincidencia
+// mode = 1 : al haber coincidencia dispara la alarma y retorna 1
+// mode = 0 : al haber coincidencia no dispara y retorna 1 y si no hubo coincidencia retorna 0
 void VerificarAlarma(reloj_t reloj) {
     // Necesito verificar alarma solo cada minuto:
+
     if ((reloj->hora_actual[4] == 0) && (reloj->hora_actual[5] == 0)) {
 
         // Convierto hora_actual y alarma a segundos, sumo el snooze a alarma y comparo.
@@ -181,6 +187,7 @@ void CancelarAlarma(reloj_t reloj) {
     reloj->snooze_offset = 0;
     reloj->disparar_alarma(reloj, false);
 }
+
 /*
 void DeshabilitarAlarma(reloj_t reloj) {
 

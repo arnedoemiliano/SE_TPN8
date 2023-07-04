@@ -29,7 +29,7 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-#define TICKS_PER_SECOND 1000 // Cuantos ticks debe contar el reloj para sumar un segundo
+#define TICKS_PER_SECOND 20 // Cuantos ticks debe contar el reloj para sumar un segundo
 
 /* === Public data type declarations =========================================================== */
 
