@@ -55,6 +55,7 @@
 #define LED_R_GPIO           5
 #define LED_R_BIT            0
 #define DELAY_SET_TIME_ALARM 3 // segundos de delay para que se active el boton set_time o set_alarm
+#define MAX_IDLE_TIME        5 // cantidad de segundos antes de cancelar por inactividad
 /* === Private data type declarations ========================================================== */
 
 typedef enum {
@@ -75,6 +76,8 @@ static const uint8_t limite_hs[] = {2, 3};
 static bool alarma_sonando = false;
 static bool flag_set_time_alarm = false; // para que el systick sepa cuando se presiono el boton
 static uint8_t cnt_set_time_alarm = DELAY_SET_TIME_ALARM; // contador para el delay del boton
+static bool flag_idle = false; // bandera para el "cancel" por inactividad
+static uint8_t cnt_idle = MAX_IDLE_TIME;
 
 /* === Private function declarations ===========================================================
  */
@@ -173,6 +176,9 @@ int main(void) {
     SisTick_Init(INT_PER_SECOND);
     DisplayToggleDot(board->display, 1);
     DisplayFlashDigits(board->display, 0, 3, 250); // cuando inicia el reloj los digitos parpadean
+    Chip_SCU_PinMuxSet(LED_R_PORT, LED_R_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_R_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, true);
 
     while (1) {
         /*
@@ -188,8 +194,10 @@ int main(void) {
         if (DigitalInputHasActivated(board->accept)) {
 
             if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_HORAS_ACTUAL);
             } else if (modo == AJUSTANDO_MINUTOS_ALARMA) {
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_HORAS_ALARMA);
             } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
                 CambiarModo(MOSTRANDO_HORA);
@@ -220,8 +228,10 @@ int main(void) {
                     CambiarModo(SIN_CONFIGURAR);
                 }
             } else if (modo == AJUSTANDO_HORAS_ACTUAL) {
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
             } else if (modo == AJUSTANDO_HORAS_ALARMA) {
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
             } else if (modo == MOSTRANDO_HORA) {
                 if (GetAlarmTime(reloj, temp_input) && !alarma_sonando) {
@@ -236,6 +246,8 @@ int main(void) {
         if (DigitalInputHasChanged(board->set_time)) {
             flag_set_time_alarm ^= 1;
             if (cnt_set_time_alarm == 0) {
+                flag_idle = true;
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
                 GetClockTime(reloj, temp_input, sizeof(temp_input));
                 DisplayClearDot(board->display, DOT_1);
@@ -247,6 +259,8 @@ int main(void) {
         if (DigitalInputHasChanged(board->set_alarm)) {
             flag_set_time_alarm ^= 1;
             if (cnt_set_time_alarm == 0 && modo != SIN_CONFIGURAR) {
+                flag_idle = true;
+                cnt_idle = MAX_IDLE_TIME;
                 CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
                 GetAlarmTime(reloj, temp_input);
                 DisplaySetDot(board->display, DOT_MASK);
@@ -256,6 +270,7 @@ int main(void) {
 
         // F3
         if (DigitalInputHasActivated(board->decrement)) {
+            cnt_idle = MAX_IDLE_TIME;
             if (modo == AJUSTANDO_MINUTOS_ACTUAL || modo == AJUSTANDO_MINUTOS_ALARMA) {
                 DecrementarBCD(&temp_input[2], limite_min);
             } else if (modo == AJUSTANDO_HORAS_ACTUAL || modo == AJUSTANDO_HORAS_ALARMA) {
@@ -266,6 +281,7 @@ int main(void) {
 
         // F4
         if (DigitalInputHasActivated(board->increment)) {
+            cnt_idle = MAX_IDLE_TIME;
             if (modo == AJUSTANDO_MINUTOS_ACTUAL || modo == AJUSTANDO_MINUTOS_ALARMA) {
                 // le paso el puntero a los dos digitos menos significativos
                 IncrementarBCD(&temp_input[2], limite_min);
@@ -273,6 +289,17 @@ int main(void) {
                 IncrementarBCD(temp_input, limite_hs);
             }
             DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+        }
+
+        if (cnt_idle == 0) {
+            flag_idle = false;
+            cnt_idle = MAX_IDLE_TIME;
+            DisplayClearDot(board->display, DOT_MASK);
+            if (GetClockTime(reloj, temp_input, sizeof(temp_input))) {
+                CambiarModo(MOSTRANDO_HORA);
+            } else {
+                CambiarModo(SIN_CONFIGURAR);
+            }
         }
 
         for (int index = 0; index < 100; index++) {
@@ -299,6 +326,7 @@ void SysTick_Handler(void) {
                 // de falsas pulsaciones
                 cnt_set_time_alarm = DELAY_SET_TIME_ALARM;
             }
+
             (void)GetClockTime(reloj, hora, RES_DISPLAY_RELOJ);
             DisplayWriteBCD(board->display, hora, sizeof(hora));
             DisplayToggleDot(board->display, 1);
@@ -306,6 +334,15 @@ void SysTick_Handler(void) {
         }
         if (tick == TICKS_PER_SECOND / 2) {
             DisplayToggleDot(board->display, 1);
+        }
+    }
+    if (modo >= AJUSTANDO_MINUTOS_ACTUAL && modo <= AJUSTANDO_HORAS_ALARMA) {
+        if (tick == 0) {
+            if (flag_idle) {
+                if (cnt_idle) {
+                    cnt_idle--;
+                }
+            }
         }
     }
     DisplayRefresh(board->display);
