@@ -47,8 +47,14 @@
 
 /* === Macros definitions ====================================================================== */
 //#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
-#define RES_DISPLAY_RELOJ 4    // Cuantos digitos del reloj se mostrarán
-#define INT_PER_SECOND    1000 // interrupciones por segundo del systick
+#define RES_DISPLAY_RELOJ    4    // Cuantos digitos del reloj se mostrarán
+#define INT_PER_SECOND       1000 // interrupciones por segundo del systick
+#define LED_R_PORT           2
+#define LED_R_PIN            0
+#define LED_R_FUNC           SCU_MODE_FUNC4
+#define LED_R_GPIO           5
+#define LED_R_BIT            0
+#define DELAY_SET_TIME_ALARM 3 // segundos de delay para que se active el boton set_time o set_alarm
 /* === Private data type declarations ========================================================== */
 
 typedef enum {
@@ -67,6 +73,8 @@ static uint8_t temp_input[4] = {0, 0, 0, 0}; // 4 porque nunca se configura la h
 static const uint8_t limite_min[] = {5, 9};
 static const uint8_t limite_hs[] = {2, 3};
 static bool alarma_sonando = false;
+static bool flag_set_time_alarm = false; // para que el systick sepa cuando se presiono el boton
+static uint8_t cnt_set_time_alarm = DELAY_SET_TIME_ALARM; // contador para el delay del boton
 
 /* === Private function declarations ===========================================================
  */
@@ -178,6 +186,7 @@ int main(void) {
         */
         // ACEPTAR
         if (DigitalInputHasActivated(board->accept)) {
+
             if (modo == AJUSTANDO_MINUTOS_ACTUAL) {
                 CambiarModo(AJUSTANDO_HORAS_ACTUAL);
             } else if (modo == AJUSTANDO_MINUTOS_ALARMA) {
@@ -224,18 +233,25 @@ int main(void) {
             }
         }
         // F1
-        if (DigitalInputHasActivated(board->set_time)) {
-            CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
-            GetClockTime(reloj, temp_input, sizeof(temp_input));
-            DisplayClearDot(board->display, DOT_1);
-            DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+        if (DigitalInputHasChanged(board->set_time)) {
+            flag_set_time_alarm ^= 1;
+            if (cnt_set_time_alarm == 0) {
+                CambiarModo(AJUSTANDO_MINUTOS_ACTUAL);
+                GetClockTime(reloj, temp_input, sizeof(temp_input));
+                DisplayClearDot(board->display, DOT_1);
+                DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+            }
         }
+
         // F2
-        if (DigitalInputHasActivated(board->set_alarm)) {
-            CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
-            GetAlarmTime(reloj, temp_input);
-            DisplaySetDot(board->display, DOT_MASK);
-            DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+        if (DigitalInputHasChanged(board->set_alarm)) {
+            flag_set_time_alarm ^= 1;
+            if (cnt_set_time_alarm == 0 && modo != SIN_CONFIGURAR) {
+                CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
+                GetAlarmTime(reloj, temp_input);
+                DisplaySetDot(board->display, DOT_MASK);
+                DisplayWriteBCD(board->display, temp_input, sizeof(temp_input));
+            }
         }
 
         // F3
@@ -260,7 +276,7 @@ int main(void) {
         }
 
         for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
+            for (int delay = 0; delay < 2500; delay++) { //= 0; delay < 25000; d
                 __asm("NOP");
             }
         }
@@ -274,6 +290,15 @@ void SysTick_Handler(void) {
     int tick = RelojNuevoTick(reloj);
     if (modo <= MOSTRANDO_HORA) {
         if (tick == 0) {
+            if (flag_set_time_alarm) {
+                if (cnt_set_time_alarm) {
+                    cnt_set_time_alarm--;
+                }
+            } else {
+                // Si la bandera esta en false se reinicia la cuenta así no se acumulan los tiempos
+                // de falsas pulsaciones
+                cnt_set_time_alarm = DELAY_SET_TIME_ALARM;
+            }
             (void)GetClockTime(reloj, hora, RES_DISPLAY_RELOJ);
             DisplayWriteBCD(board->display, hora, sizeof(hora));
             DisplayToggleDot(board->display, 1);
@@ -286,16 +311,6 @@ void SysTick_Handler(void) {
     DisplayRefresh(board->display);
 }
 
-/* === End of documentation ====================================================================
- */
+/* === End of documentation ====================================================================*/
 
 /** @} End of module definition for doxygen */
-
-/*
-if (numero[0] < limite[0]) {
-            numero[1] = 0;
-        }
-
-
-
-*/
