@@ -1,6 +1,6 @@
-# Laboratorio de Microprocesadores: Trabajo Práctico N°6
+# Laboratorio de Microprocesadores: Trabajo Práctico N°8
 
-Hardware abstraction layer
+Implementación del reloj despertador
 
 ## Instalación
 
@@ -8,11 +8,11 @@ Usar el programa [make](https://www.gnu.org/software/make/) para compilar y gene
 1. Clonar el repositorio desde GitHub:
 
     ```bash
-    git clone https://github.com/arnedoemiliano/SE_TPN6.git
+    git clone https://github.com/arnedoemiliano/SE_TPN8.git
     ```
 2. Acceder a la ubicacion del proyecto:
      ```bash
-    cd SE_TPN6
+    cd SE_TPN8
     ```
 3. Compilar el proyecto:
      ```go
@@ -29,6 +29,6 @@ Usar el programa [make](https://www.gnu.org/software/make/) para compilar y gene
 
 ## Créditos
 
-Este proyecto forma parte del trabajo práctico N°6 de la asignatura Laboratorio de Microprocesadores de la [Facultad de Ciencias Exactas y Tecnología](https://www.facet.unt.edu.ar/) de la Universidad Nacional de Tucumán.
+Este proyecto forma parte del trabajo práctico N°8 de la asignatura Laboratorio de Microprocesadores de la [Facultad de Ciencias Exactas y Tecnología](https://www.facet.unt.edu.ar/) de la Universidad Nacional de Tucumán.
 
 

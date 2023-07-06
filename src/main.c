@@ -49,11 +49,6 @@
 //#define RES_RELOJ         6    // Cuantos digitos tiene el reloj
 #define RES_DISPLAY_RELOJ    4    // Cuantos digitos del reloj se mostrarán
 #define INT_PER_SECOND       1000 // interrupciones por segundo del systick
-#define LED_R_PORT           2
-#define LED_R_PIN            0
-#define LED_R_FUNC           SCU_MODE_FUNC4
-#define LED_R_GPIO           5
-#define LED_R_BIT            0
 #define DELAY_SET_TIME_ALARM 3 // segundos de delay para que se active el boton set_time o set_alarm
 #define MAX_IDLE_TIME        5 // cantidad de segundos antes de cancelar por inactividad
 /* === Private data type declarations ========================================================== */
@@ -176,9 +171,6 @@ int main(void) {
     SisTick_Init(INT_PER_SECOND);
     DisplayToggleDot(board->display, 1);
     DisplayFlashDigits(board->display, 0, 3, 250); // cuando inicia el reloj los digitos parpadean
-    Chip_SCU_PinMuxSet(LED_R_PORT, LED_R_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_R_FUNC);
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, false);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, true);
 
     while (1) {
         /*
